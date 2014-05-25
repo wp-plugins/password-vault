@@ -1,14 +1,15 @@
-=== Redirection Reporting ===
+=== Password Vault ===
 Contributors: mrdenny
 Donate Link: http://dcac.co/go/password-vault
-Tags: passwords
+Tags: passwords, password vault, password repository
 Requires at least: 3.0.1
 Tested up to: 3.9
 Stable tag: trunk
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Allows for daily reporting for redirected requests.
+Gives you an application within the Wordpress admin screen which allows you to securely save information for accounts 
+which you use regularly.
 
 == Description ==
 
@@ -36,8 +37,9 @@ e.g.
 
 1. Upload the contents of the zip file to the `/wp-content/plugins/password-vault` directory
 2. Activate the plugin through the 'Plugins' menu in WordPress
-3. Configure the settings through the settings page.
-4. Begin documenting account information through the tools page.
+3. Set a secure password as the SECURE_AUTH_KEY value in the wp-config.php file
+4. Configure the settings through the settings page.
+5. Begin documenting account information through the tools page.
 
 
 == Frequently Asked Questions ==
