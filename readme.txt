@@ -1,7 +1,7 @@
 === Password Vault ===
 Contributors: mrdenny
 Donate Link: http://dcac.co/go/password-vault
-Tags: passwords, password vault, password repository, password locker, password
+Tags: passwords, password vault, password repository, password locker, password, keypass, 7pass, lastpass, 1password, keeper
 Requires at least: 3.0.1
 Tested up to: 3.9
 Stable tag: trunk
