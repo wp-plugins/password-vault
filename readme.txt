@@ -109,6 +109,9 @@ This is done as a security precaution.  Every time the plugin is activated it tu
 
 == Changelog ==
 
+= 1.2.1 =
+* Fixing upgrade code.
+
 = 1.2 =
 * Made auditing optional
 * Logs when auditing is enabled and disabled
