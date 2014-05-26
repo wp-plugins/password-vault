@@ -8,7 +8,51 @@ class password_vault_tools {
 			echo '<div if="message" class="error"><p>This application is configured to require SSL.  You have connected to this website without using SSL. Please connect using HTTPS:// instead of HTTP:// in order to use this application or contact your administrator to disable this requirement.</p></div>';
 			return;
 		}
+
+		if (get_current_user_id()==0) {
+			echo '<div if="message" class="error"><p>This application is only available to logged on users.  Please <a href="/wp-admin/">login</a> to the site to use this application.</p></div>';
+			return;
+
+		}
+
 		$this->show_menu();
+
+	}
+
+	function insert_audit($vault_id, $action, $new_username = NULL, $new_password = NULL, $bypass = NULL) {
+
+		$options = get_option('password_vault');
+		if (!$bypass && !$options['auditing']) {
+			return;
+		}
+
+		global $wpdb;
+		$old_username = null;
+		$old_password = null;
+
+		if ($new_username || $new_password) {
+			$row=$wpdb->get_row(
+				$wpdb->prepare("select username, password 
+from {$wpdb->prefix}password_vault_vault
+where vault_id = %d",
+				$vault_id)
+			);
+
+			if ($row) {
+				$old_username = $row->username;
+				$old_password = $row->password;
+			}
+			
+		}
+
+		if ($new_password) {
+			$new_password = $this->encrypt_value($new_password);
+		}
+
+		$wpdb->query(
+			$wpdb->prepare("insert into {$wpdb->prefix}password_vault_audit (vault_id, create_date, user_id, action, old_username, new_username, old_password, new_password) VALUES (%d, now(), %d, %s, %s, %s, %s, %s)", 
+			$vault_id, get_current_user_id(), $action, $old_username, $new_username, $old_password, $new_password)
+		);
 
 	}
 
@@ -61,8 +105,10 @@ class password_vault_tools {
 		$sql = "select v.audit_id, v.create_date, u.user_login, v.action, case when strcmp(v.old_username, v.new_username) then ', Username Changed' end UsernameChanged, case when strcmp(v.old_password, v.new_password) then ', Password Changed' end PasswordChanged
 from {$wpdb->prefix}password_vault_audit v
 join {$wpdb->users} u ON v.user_id = u.ID
-WHERE v.vault_id = %d
+WHERE v.vault_id IN (%d, 0)
 ORDER BY v.create_date desc, audit_id desc";
+
+		$this->insert_audit($_GET['vault_id'], 'view_audit');
 
 		$audits = $wpdb->get_results(
 				$wpdb->prepare($sql,
@@ -232,10 +278,7 @@ ORDER BY v.create_date desc, audit_id desc";
 
 		if ($command == 'update') {
 			
-			$wpdb->query(
-				$wpdb->prepare("insert into {$wpdb->prefix}password_vault_audit (vault_id, create_date, user_id, action, old_username, new_username, old_password, new_password) SELECT vault_id, now(), %d, 'update', username, %s, password, %s from {$wpdb->prefix}password_vault_vault WHERE vault_id = %d", 
-				get_current_user_id(), $_POST['username'], $this->encrypt_value($_POST['password']), $_POST['vault_id'])
-			);
+			$this->insert_audit($_POST['vault_id'], 'update', $_POST['username'], $_POST['password']);
 
 			$wpdb->query(
 				$wpdb->prepare("update {$wpdb->prefix}password_vault_vault set username = %s, password = %s, label1 = %s, label2 = %s, label3 = %s, label4 = %s, label5 = %s, modify_date=now(), modify_by=%d WHERE vault_id = %d",
@@ -443,10 +486,7 @@ ORDER BY v.create_date desc, audit_id desc";
 				echo "<input type='hidden' name='sub_action' value='update'>";
 			}
 
-			$wpdb->query(
-				$wpdb->prepare("insert into {$wpdb->prefix}password_vault_audit (vault_id, create_date, user_id, action) values (%d, now(), %d, 'select')", 
-				$vault_id, get_current_user_id())
-			);
+			$this->insert_audit($vault_id, 'select');
 
 			echo "<table>";
 			echo "<tr><td>User Name:</td><td><input type='text' name='username' value='{$account->username}'";

@@ -64,6 +64,7 @@ class password_vault_settings {
 
 		add_settings_section('password_vault_security', __('Security Settings', ''), array(&$this, 'security_settings'), 'password_vault');
 		add_settings_field('ssl_only', __('Requires SSL:', ''), array(&$this, 'ssl_only'), 'password_vault', 'password_vault_security');
+		add_settings_field('auditing', __('Enable Auditing:', ''), array(&$this, 'auditing'), 'password_vault', 'password_vault_security');
 		
 		add_settings_section('password_vault_keymanagement', __('Key Management', ''), array(&$this, 'keymanagement_section'), 'password_vault');
 		add_settings_field('oldkey', __('Old Key: ', ''), array(&$this, 'oldkey'), 'password_vault', 'password_vault_keymanagement');
@@ -71,6 +72,11 @@ class password_vault_settings {
 
 	function security_settings() {
 		echo 'The "Require SSL" setting only applies to the usage of this plugin, not to the entire website.';
+	}
+
+	function auditing() {
+		$options = get_option('password_vault');
+		echo "<input type='checkbox' name='password_vault[auditing]' value='checked' {$options['auditing']}>";
 	}
 
 	function ssl_only() {
@@ -159,6 +165,17 @@ class password_vault_settings {
 		}
 		if (!$input['label5']) {
 			$input['label5_req']='';
+		}
+
+		$options = get_option('password_vault');
+		if ($options['auditing'] && !$input['auditing']) {
+			$password_vault_tools = new password_vault_tools;
+			$password_vault_tools->insert_audit(0, 'audit_disabled', NULL, NULL, 'true');
+		}
+
+		if (!$options['auditing'] && $input['auditing']) {
+			$password_vault_tools = new password_vault_tools;
+			$password_vault_tools->insert_audit(0, 'audit_enabled', NULL, NULL, 'true');
 		}
 
 		return $input;

@@ -92,6 +92,10 @@ This is because the application is using the <a href="http://codex.wordpress.org
 which isn't correctly handle load balancers.  For now it is recommended that you follow the directions in the is_ssl() 
 document and add the "Force SSL URL Scheme" plugin to your site so that the site forces SSL.
 
+= Why does auditing turn itself on every time I upgrade or activate the plugin? =
+
+This is done as a security precaution.  Every time the plugin is activated it turns auditing back on if it is disabled.
+
 == Screenshots ==
 
 1. Adding a new account.
@@ -104,6 +108,11 @@ document and add the "Force SSL URL Scheme" plugin to your site so that the site
 
 
 == Changelog ==
+
+= 1.2 =
+* Made auditing optional
+* Logs when auditing is enabled and disabled
+* Tightened up the code a little
 
 = 1.1 =
 * Cleaned up buttons
