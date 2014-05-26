@@ -113,6 +113,7 @@ This is done as a security precaution.  Every time the plugin is activated it tu
 * Made auditing optional
 * Logs when auditing is enabled and disabled
 * Tightened up the code a little
+* Added an additional security check to ensure user is logged in when using the application
 
 = 1.1 =
 * Cleaned up buttons
