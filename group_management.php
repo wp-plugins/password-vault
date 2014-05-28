@@ -124,7 +124,7 @@ class password_vault_groups {
 			);
 
 			if ($users) {
-				echo "<table><tr><td>Add</td><td>Remove</td><td>User Name</td></tr>";
+				echo "<table border='1' cellspacing='0' cellpadding='0'><tr><td>Add</td><td>Remove</td><td>User Name</td></tr>";
 				foreach ($users as $user) {
 					echo "<tr><td align='center'>";
 					if ($user->exists1 == 0) {

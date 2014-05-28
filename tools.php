@@ -489,7 +489,7 @@ ORDER BY v.create_date desc, audit_id desc";
 			$this->insert_audit($vault_id, 'select');
 
 			echo "<table>";
-			echo "<tr><td>User Name:</td><td><input type='text' name='username' value='{$account->username}'";
+			echo "<tr><td>User Name:</td><td><input type='text' name='username' value='{$this->clean_text($account->username)}'";
 			if ($status=='success') {
 				echo ' disabled';
 			}
@@ -589,27 +589,27 @@ ORDER BY v.create_date desc, audit_id desc";
 					$wpdb->prepare($sql,
 					$values)
 				);
-
+				echo "<table>";
 				if ($permissions) {
 					echo "<form name='edit_permissions' method='post'>";
 					
 					echo "<input type='hidden' name='action' value='edit_permissions'>";
 					echo "<input type='hidden' name='sub_action' value='update'>";
 					echo "<input type='hidden' name='vault_id' value='{$account->vault_id}'>";
-					echo "<table><tr><td align='center'><b>User Name</b></td><td align='center'><b>Read</b></td><td align='center'><b>Write</b></td><td align='center'><b>Owner</b></td></tr>";
+					echo "<tr><td align='center'><b>User Name</b></td><td align='center'><b>Read</b></td><td align='center'><b>Write</b></td><td align='center'><b>Owner</b></td></tr>";
 					foreach ($permissions as $permission) {
 						echo "<tr><td>{$permission->user_login}</td>";
-						echo "<td><input type='checkbox' name='{$permission->user_login}-read' value='1' {$permission->user_read_per}";
+						echo "<td align='center'><input type='checkbox' name='{$permission->user_login}-read' value='1' {$permission->user_read_per}";
 						if ($permission->ID==get_current_user_id()) {
 							echo " disabled";
 						}
 						echo "></td>";
-						echo "<td><input type='checkbox' name='{$permission->user_login}-write' value='1' {$permission->user_write_per}";
+						echo "<td align='center'><input type='checkbox' name='{$permission->user_login}-write' value='1' {$permission->user_write_per}";
 						if ($permission->ID==get_current_user_id()) {
 							echo " disabled";
 						}
 						echo "></td>";
-						echo "<td><input type='checkbox' name='{$permission->user_login}-owner' value='1' {$permission->user_owner_per}";
+						echo "<td align='center'><input type='checkbox' name='{$permission->user_login}-owner' value='1' {$permission->user_owner_per}";
 						if ($permission->ID==get_current_user_id()) {
 							echo " disabled";
 						}
@@ -619,7 +619,7 @@ ORDER BY v.create_date desc, audit_id desc";
 						}
 						echo "</td></tr>";
 					}
-					echo "</table>";
+					//echo "</table>";
 
 				$sql = "select g.group_name, g.group_id, case when up.read_per = 1 then 'checked' else '' end group_read_per, case when up.write_per = 1 then 'checked' else '' end group_write_per, case when up.owner_per = 1 then 'checked' else '' end group_owner_per
 				from {$wpdb->prefix}password_vault_groups g
@@ -634,21 +634,15 @@ ORDER BY v.create_date desc, audit_id desc";
 				);
 
 				if ($permissions) {
-					echo "<form name='edit_permissions' method='post'>";
-					
-					echo "<input type='hidden' name='action' value='edit_permissions'>";
-					echo "<input type='hidden' name='sub_action' value='update'>";
-					echo "<input type='hidden' name='vault_id' value='{$account->vault_id}'>";
-					echo "<table><tr><td align='center'><b>Group Name</b></td><td align='center'><b>Read</b></td><td align='center'><b>Write</b></td><td align='center'><b>Owner</b></td></tr>";
+					echo "<tr><td align='center'><b>Group Name</b></td><td align='center'><b>Read</b></td><td align='center'><b>Write</b></td><td align='center'><b>Owner</b></td></tr>";
 					foreach ($permissions as $permission) {
 						echo "<tr><td>{$permission->group_name}</td>";
-						echo "<td><input type='checkbox' name='group-{$permission->group_id}-read' value='1' {$permission->group_read_per}></td>";
-						echo "<td><input type='checkbox' name='group-{$permission->group_id}-write' value='1' {$permission->group_write_per}></td>";
-						echo "<td><input type='checkbox' name='group-{$permission->group_id}-owner' value='1' {$permission->group_owner_per}></td></tr>";
+						echo "<td align='center'><input type='checkbox' name='group-{$permission->group_id}-read' value='1' {$permission->group_read_per}></td>";
+						echo "<td align='center'><input type='checkbox' name='group-{$permission->group_id}-write' value='1' {$permission->group_write_per}></td>";
+						echo "<td align='center'><input type='checkbox' name='group-{$permission->group_id}-owner' value='1' {$permission->group_owner_per}></td></tr>";
 					}
-					echo "</table>";
 				}
-
+					echo "</table>";
 					echo '<div class="submit"><input name="submit" type="submit" class="button-primary" value="Save Permissions"></div></form>';
 				}
 			} else {
@@ -795,6 +789,18 @@ ORDER BY v.create_date desc, audit_id desc";
 	function footer() {
 		$password_vault_main = new password_vault_main();
 		$password_vault_main->footer();
+	}
+
+	function clean_text($string) {
+		$patterns = array();
+		$replacements = array();
+
+		//$patterns[0] = '\\';
+		//$replacements[0] = '\';
+		
+		$string = str_replace($patterns, $replacements , $string);
+
+		return $string;
 	}
 
 }
