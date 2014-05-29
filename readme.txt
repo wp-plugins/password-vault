@@ -96,11 +96,6 @@ document and add the "Force SSL URL Scheme" plugin to your site so that the site
 
 This is done as a security precaution.  Every time the plugin is activated it turns auditing back on if it is disabled.
 
-= When I put a back slash in one of the fields (for a Windows domain account for example) it is shown twice for some reason. =
-
-Yes we know.  It's an annoyance of how wordpress escapes the characters when it's putting the values into the database command.  We are working on fixing this, but at the moment your best bet
-is to setup one of the user defined variables as a "Windows Domain" field and use that.  Or simply live with the double backslash for now until we can get it fixed.  Once we've gotten it we'll make sure to do through the upgrade script and clean up any problem values in the database.
-
 == Screenshots ==
 
 1. Adding a new account.
@@ -113,6 +108,12 @@ is to setup one of the user defined variables as a "Windows Domain" field and us
 
 
 == Changelog ==
+
+= 1.2.4 =
+* Fixed the double back slash problem
+* Removed the double back slash problem from the FAQ
+* Made URLs in the user defined fields clickable from the search page
+* Fixed formatting on the Find Account page
 
 = 1.2.3 =
 * Fixed formatting issues with a couple of tables.

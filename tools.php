@@ -142,10 +142,10 @@ ORDER BY v.create_date desc, audit_id desc";
 			echo "<input type='hidden' name='sub_action2' value='new'>";
 		} else {
 			echo "<input type='hidden' name='sub_action2' value='update'>";
-			echo "<input type='hidden' name='username' value='{$_POST['username']}'>";
+			echo "<input type='hidden' name='username' value='{$this->clean_text($_POST['username'])}'>";
 		}
 		echo "<table>";
-		echo "<tr><td>User Name:</td><td><input type='text' name='username' value='{$_POST['username']}'";
+		echo "<tr><td>User Name:</td><td><input type='text' name='username' value='{$this->clean_text($_POST['username'])}'";
 		if ($status=='success') {
 			echo ' disabled';
 		}
@@ -271,7 +271,7 @@ ORDER BY v.create_date desc, audit_id desc";
 			$sql = "insert into {$wpdb->prefix}password_vault_user_permissions (user_id, vault_id, read_per, write_per, owner_per) values ({$user_id}, {$vault_id}, 1,1,1)";
 			$wpdb->query($sql);
 
-			echo "<div if='message' class='updated'><p>{$_POST['username']} has been added with an ID of {$vault_id}.</p></div>";
+			echo "<div if='message' class='updated'><p>{$this->clean_text($_POST['username'])} has been added with an ID of {$vault_id}.</p></div>";
 
 			$status='success';
 		}
@@ -284,7 +284,7 @@ ORDER BY v.create_date desc, audit_id desc";
 				$wpdb->prepare("update {$wpdb->prefix}password_vault_vault set username = %s, password = %s, label1 = %s, label2 = %s, label3 = %s, label4 = %s, label5 = %s, modify_date=now(), modify_by=%d WHERE vault_id = %d",
 				$_POST['username'], $this->encrypt_value($_POST['password']), $_POST['label1'], $_POST['label2'], $_POST['label3'], $_POST['label4'], $_POST['label5'], get_current_user_id(), $_POST['vault_id'])
 			);
-			echo "<div if='message' class='updated'><p>{$_POST['username']} has been updated.</p></div>";
+			echo "<div if='message' class='updated'><p>{$this->clean_text($_POST['username'])} has been updated.</p></div>";
 
 			$status='success';
 		}
@@ -396,50 +396,90 @@ ORDER BY v.create_date desc, audit_id desc";
 
 		if ($accounts)
 		{
-			echo "<table border='1' cellpadding='0' cellspacing='0'><tr><td>User Name</td>";
+			echo "<table border='1' cellpadding='0' cellspacing='0'><tr><td align='center'><b>User Name</b></td>";
 			if (!empty($options['label1'])) {
-				echo "<td>{$options['label1']}</td>";
+				echo "<td align='center'><b>{$options['label1']}</b></td>";
 			}
 			if (!empty($options['label2'])) {
-				echo "<td>{$options['label2']}</td>";
+				echo "<td align='center'><b>{$options['label2']}</b></td>";
 			}
 			if (!empty($options['label3'])) {
-				echo "<td>{$options['label3']}</td>";
+				echo "<td align='center'><b>{$options['label3']}</b></td>";
 			}
 			if (!empty($options['label4'])) {
-				echo "<td>{$options['label4']}</td>";
+				echo "<td align='center'><b>{$options['label4']}</b></td>";
 			}
 			if (!empty($options['label5'])) {
-				echo "<td>{$options['label5']}</td>";
+				echo "<td align='center'><b>{$options['label5']}</b></td>";
 			}
-			echo "<td>View Audit</td></tr>";
+			echo "<td align='center'><b>View Audit</b></td></tr>";
 			foreach ($accounts as $account)
 			{
 				echo "<tr><td>";
 				if ($this->effective_permission($account, 'read')==1) {
 					echo "<a href='./tools.php?page=password_vault&vault_id={$account->vault_id}&action=show'>";
 				}
-				echo $account->username;
+				echo $this->clean_text($account->username);
 				if ($this->effective_permission($account, 'read')==1) {
 					echo "</a>";
 				}
 				echo "</td>";
 				if (!empty($options['label1'])) {
-					echo "<td>{$account->label1}</td>";
+					echo "<td>";
+					if ($this->is_valid_domain_name($account->label1)) {
+						echo "<a href='http://{$account->label1}'>";
+					}
+					echo $this->clean_text($account->label1);
+					if ($this->is_valid_domain_name($account->label1)) {
+						echo "</a>";
+					}
+					echo "</td>";
 				}
 				if (!empty($options['label2'])) {
-					echo "<td>{$account->label2}</td>";
+					echo "<td>";
+					if ($this->is_valid_domain_name($account->label2)) {
+						echo "<a href='http://{$account->label2}'>";
+					}
+					echo $this->clean_text($account->label2);
+					if ($this->is_valid_domain_name($account->label2)) {
+						echo "</a>";
+					}
+					echo "</td>";
 				}
 				if (!empty($options['label3'])) {
-					echo "<td>{$account->label3}</td>";
+					echo "<td>";
+					if ($this->is_valid_domain_name($account->label3)) {
+						echo "<a href='http://{$account->label3}'>";
+					}
+					echo $this->clean_text($account->label3);
+					if ($this->is_valid_domain_name($account->label3)) {
+						echo "</a>";
+					}
+					echo "</td>";
 				}
 				if (!empty($options['label4'])) {
-					echo "<td>{$account->label4}</td>";
+					echo "<td>";
+					if ($this->is_valid_domain_name($account->label4)) {
+						echo "<a href='http://{$account->label4}'>";
+					}
+					echo $this->clean_text($account->label4);
+					if ($this->is_valid_domain_name($account->label4)) {
+						echo "</a>";
+					}
+					echo "</td>";
 				}
 				if (!empty($options['label5'])) {
-					echo "<td>{$account->label5}</td>";
+					echo "<td>";
+					if ($this->is_valid_domain_name($account->label5)) {
+						echo "<a href='http://{$account->label5}'>";
+					}
+					echo $this->clean_text($account->label5);
+					if ($this->is_valid_domain_name($account->label5)) {
+						echo "</a>";
+					}
+					echo "</td>";
 				}
-				echo "<td><a href=
+				echo "<td align='center'><a href=
 'tools.php?page=password_vault&action=view_archive&vault_id={$account->vault_id}'
 ><img src='../wp-content/plugins/password-vault/archive.png' width='20' height='20' border='0'></a></td>";
 				echo "</tr>";
@@ -502,35 +542,35 @@ ORDER BY v.create_date desc, audit_id desc";
 			}
 			echo "</td><tr>";
 			if (!empty($options['label1'])) {
-				echo "<tr><td>{$options['label1']}:</td><td><input type='text' name='label1' value='{$account->label1}'>";
+				echo "<tr><td>{$options['label1']}:</td><td><input type='text' name='label1' value='{$this->clean_text($account->label1)}'>";
 			if (!empty($options['label1_req'])) {
 				echo "*";
 			}
 			echo "</td></tr>";
 			}
 			if (!empty($options['label2'])) {
-				echo "<tr><td>{$options['label2']}:</td><td><input type='text' name='label2' value='{$account->label2}'>";
+				echo "<tr><td>{$options['label2']}:</td><td><input type='text' name='label2' value='{$this->clean_text($account->label2)}'>";
 			if (!empty($options['label2_req'])) {
 				echo "*";
 			}
 			echo "</td></tr>";
 			}
 			if (!empty($options['label3'])) {
-				echo "<tr><td>{$options['label3']}:</td><td><input type='text' name='label3' value='{$account->label3}'>";
+				echo "<tr><td>{$options['label3']}:</td><td><input type='text' name='label3' value='{$this->clean_text($account->label3)}'>";
 			if (!empty($options['label3_req'])) {
 				echo "*";
 			}
 			echo "</td></tr>";
 			}
 			if (!empty($options['label4'])) {
-				echo "<tr><td>{$options['label4']}:</td><td><input type='text' name='label4' value='{$account->label4}'>";
+				echo "<tr><td>{$options['label4']}:</td><td><input type='text' name='label4' value='{$this->clean_text($account->label4)}'>";
 			if (!empty($options['label4_req'])) {
 				echo "*";
 			}
 			echo "</td></tr>";
 			}
 			if (!empty($options['label5'])) {
-				echo "<tr><td>{$options['label5']}:</td><td><input type='text' name='label5' value='{$account->label5}'>";
+				echo "<tr><td>{$options['label5']}:</td><td><input type='text' name='label5' value='{$this->clean_text($account->label5)}'>";
 			if (!empty($options['label5_req'])) {
 				echo "*";
 			}
@@ -795,12 +835,21 @@ ORDER BY v.create_date desc, audit_id desc";
 		$patterns = array();
 		$replacements = array();
 
-		//$patterns[0] = '\\';
-		//$replacements[0] = '\';
+		$patterns[0] = '\\\\';
+		$replacements[0] = '\\';
 		
 		$string = str_replace($patterns, $replacements , $string);
 
 		return $string;
+	}
+
+	function is_valid_domain_name($domain_name)
+	{
+	    return (preg_match("/^([a-z\d](-*[a-z\d])*)(\.([a-z\d](-*[a-z\d])*))*$/i", $domain_name) //valid chars check
+	            && preg_match("/^.{1,253}$/", $domain_name) //overall length check
+	            && preg_match("/^[^\.]{1,63}(\.[^\.]{1,63})*$/", $domain_name)    //length of each label
+		    && preg_match("/[a-z\d]\.[a-z\d]/", $domain_name) 
+		);
 	}
 
 }
