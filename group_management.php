@@ -55,7 +55,9 @@ class password_vault_groups {
 			echo "</table>";
 		}
 
-		echo "<form name='new-group' method='post' action='options-general.php?page=password_vault_settings&action=group_management'>";
+		$page = $this->get_source_page();
+
+		echo "<form name='new-group' method='post' action='{$page}?page=password_vault_settings&action=group_management'>";
 		echo "<input type='hidden' name='sub_action' value='add'>";
 		echo "Group Name: <input type='text' name='group_name'><br>";
 		echo '<div class="submit"><input name="submit" type="submit" class="button-primary" value="Save Group"></div></form>';
@@ -66,7 +68,7 @@ class password_vault_groups {
 		$sql = "select group_id, group_name
 			from {$wpdb->prefix}password_vault_groups
 			order by group_name";
-
+		$page = $this->get_source_page();
 		$groups = $wpdb->get_results($sql);
 		if ($_POST['group_id']) {
 			$group_id=$_POST['group_id'];
@@ -128,11 +130,11 @@ class password_vault_groups {
 				foreach ($users as $user) {
 					echo "<tr><td align='center'>";
 					if ($user->exists1 == 0) {
-						echo "<a href='./options-general.php?page=password_vault_settings&action=group_membership&sub_action=add&group_id={$group_id}&user_id={$user->ID}'><img src='../wp-content/plugins/password-vault/check.png' height='20' width='20'></a>";
+						echo "<a href='./{$page}?page=password_vault_settings&action=group_membership&sub_action=add&group_id={$group_id}&user_id={$user->ID}'><img src='../wp-content/plugins/password-vault/check.png' height='20' width='20'></a>";
 					}
 					echo "</td><td align='center'>";
 					if ($user->exists1 == 1) {
-						echo "<a href='./options-general.php?page=password_vault_settings&action=group_membership&sub_action=delete&group_id={$group_id}&user_id={$user->ID}'><img src='../wp-content/plugins/password-vault/x.png' height='13' width='13'></a>";
+						echo "<a href='./{$page}?page=password_vault_settings&action=group_membership&sub_action=delete&group_id={$group_id}&user_id={$user->ID}'><img src='../wp-content/plugins/password-vault/x.png' height='13' width='13'></a>";
 					}
 					echo "</td><td>{$user->user_login}</td></tr>";
 				}
@@ -140,6 +142,12 @@ class password_vault_groups {
 			}
 				
 		}
+	}
+
+	function get_source_page() {
+		$password_vault_settings = new password_vault_settings();
+		$page = $password_vault_settings->get_source_page();
+		return $page;
 	}
 
 }

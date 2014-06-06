@@ -90,7 +90,8 @@ Neither, they are merged.
 
 This is because the application is using the <a href="http://codex.wordpress.org/Function_Reference/is_ssl">is_ssl()</a> function within Wordpress
 which isn't correctly handle load balancers.  For now it is recommended that you follow the directions in the is_ssl() 
-document and add the "Force SSL URL Scheme" plugin to your site so that the site forces SSL.
+document and add the "Force SSL URL Scheme" plugin to your site so that the site forces SSL.  If this doesn't work, contact us 
+via the forums and we'll figure it out.
 
 = Why does auditing turn itself on every time I upgrade or activate the plugin? =
 
@@ -105,9 +106,13 @@ This is done as a security precaution.  Every time the plugin is activated it tu
 5. Main settings page.
 6. Group Management settings page.
 7. Group Membership settings page.
+8. Optional Settings Menu
 
 
 == Changelog ==
+
+= 1.3 =
+* Made option to have application as it's own menu item instead of under Options and Tools menus
 
 = 1.2.4 =
 * Fixed the double back slash problem

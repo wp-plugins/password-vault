@@ -338,6 +338,7 @@ ORDER BY v.create_date desc, audit_id desc";
 	function run_search() {
 		global $wpdb;
 		$options = get_option('password_vault');
+		$page = $this->get_source_page();
 
 		$user_id = get_current_user_id();
 		$username = "{$_POST['username']}%";
@@ -417,7 +418,7 @@ ORDER BY v.create_date desc, audit_id desc";
 			{
 				echo "<tr><td>";
 				if ($this->effective_permission($account, 'read')==1) {
-					echo "<a href='./tools.php?page=password_vault&vault_id={$account->vault_id}&action=show'>";
+					echo "<a href='./{$page}?page=password_vault&vault_id={$account->vault_id}&action=show'>";
 				}
 				echo $this->clean_text($account->username);
 				if ($this->effective_permission($account, 'read')==1) {
@@ -480,7 +481,7 @@ ORDER BY v.create_date desc, audit_id desc";
 					echo "</td>";
 				}
 				echo "<td align='center'><a href=
-'tools.php?page=password_vault&action=view_archive&vault_id={$account->vault_id}'
+'{$page}?page=password_vault&action=view_archive&vault_id={$account->vault_id}'
 ><img src='../wp-content/plugins/password-vault/archive.png' width='20' height='20' border='0'></a></td>";
 				echo "</tr>";
 			}
@@ -850,6 +851,12 @@ ORDER BY v.create_date desc, audit_id desc";
 	            && preg_match("/^[^\.]{1,63}(\.[^\.]{1,63})*$/", $domain_name)    //length of each label
 		    && preg_match("/[a-z\d]\.[a-z\d]/", $domain_name) 
 		);
+	}
+
+	function get_source_page() {
+		$password_vault_main = new password_vault_main();
+		$page = $password_vault_main->get_source_page('tools');
+		return $page;
 	}
 
 }

@@ -9,7 +9,9 @@ class password_vault_settings {
 
 		$options = get_option('password_vault');
 
-		echo "<br><form name='action_to_take' method='post' action='./options-general.php?page=password_vault_settings'>";
+		$page = $this->get_source_page();
+
+		echo "<br><form name='action_to_take' method='post' action='./{$page}?page=password_vault_settings'>";
 		echo "<input type='submit' value='General Settings' name='action' class='button-secondary'>";
 		echo "<input type='submit' value='Group Management' name='action' class='button-secondary'>";
 		echo "<input type='submit' value='Group Membership' name='action' class='button-secondary'>";
@@ -60,6 +62,7 @@ class password_vault_settings {
 		add_settings_field('label3', __('Custom Field 3:', ''), array(&$this, 'label3'), 'password_vault', 'password_vault_labels');
 		add_settings_field('label4', __('Custom Field 4:', ''), array(&$this, 'label4'), 'password_vault', 'password_vault_labels');
 		add_settings_field('label5', __('Custom Field 5:', ''), array(&$this, 'label5'), 'password_vault', 'password_vault_labels');
+		add_settings_field('seperate_icon', __('Dedicated Menu:', ''), array(&$this, 'seperate_icon'), 'password_vault', 'password_vault_labels');
 		#add_settings_field('min_permissions', __('Minimum Permissions To Use: ', ''), array(&$this, 'min_permissions'), 'password_vault', 'password_vault_labels');
 
 		add_settings_section('password_vault_security', __('Security Settings', ''), array(&$this, 'security_settings'), 'password_vault');
@@ -68,6 +71,24 @@ class password_vault_settings {
 		
 		add_settings_section('password_vault_keymanagement', __('Key Management', ''), array(&$this, 'keymanagement_section'), 'password_vault');
 		add_settings_field('oldkey', __('Old Key: ', ''), array(&$this, 'oldkey'), 'password_vault', 'password_vault_keymanagement');
+	}
+
+	function seperate_icon() {
+		$options = get_option('password_vault');
+		echo "<input type='checkbox' name='password_vault[seperate_icon]' value='checked' {$options['seperate_icon']} onclick='change_form(this.form)'>";
+		echo '
+		<script>function change_form(f) {
+
+			if (f["password_vault[seperate_icon]"].checked == true) {
+				
+				f["_wp_http_referer"].value = "/wp-admin/admin.php?page=password_vault_settings"
+			} else {
+				
+				f["_wp_http_referer"].value = "/wp-admin/options-general.php?page=password_vault_settings"
+			}
+		}
+		</script>
+		';
 	}
 
 	function security_settings() {
@@ -282,5 +303,11 @@ class password_vault_settings {
 	function footer() {
 		$password_vault_main = new password_vault_main();
 		$password_vault_main->footer();
+	}
+
+	function get_source_page() {
+		$password_vault_main = new password_vault_main();
+		$page = $password_vault_main->get_source_page('settings');
+		return $page;
 	}
 }
