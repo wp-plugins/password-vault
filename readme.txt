@@ -111,6 +111,9 @@ This is done as a security precaution.  Every time the plugin is activated it tu
 
 == Changelog ==
 
+= 1.3.2 =
+* Fixing icon in custom menu, because I'm an idiot.
+
 = 1.3.1 =
 * Fixing icon files which didn't get uploaded in the initial 1.3 release
 

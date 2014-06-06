@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: Password Vault
-Version: 1.3.1
+Version: 1.3.2
 Plugin URI: http://dcac.co/go/password-vault
 Description: Allows for the secure saving of passwords.  Access to a specific account can be given based on users and/or groups.  Groups are defined within WordPress or within the plugin directly.
 Author: Denny Cherry
@@ -105,7 +105,7 @@ class password_vault_main {
 		$password_vault_tools = new password_vault_tools();
 		$password_vault_settings = new password_vault_settings();
 
-		add_menu_page('Password Vault', 'Password Vault', '', 'password_vault_top', array($password_vault_tools, 'show_tools_page'));
+		add_menu_page('Password Vault', 'Password Vault', '', 'password_vault_top', array($password_vault_tools, 'show_tools_page'), plugins_url( 'password-vault/icon.png' ));
 
 		add_submenu_page('password_vault_top', 'Password Vault', 'Password Vault', 'read', 'password_vault', array($password_vault_tools, 'show_tools_page'));
 
