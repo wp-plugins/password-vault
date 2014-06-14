@@ -6,6 +6,7 @@ class password_vault_settings {
 			wp_die( __('You are not allowed to access this part of the site') );
 		}
 		$this->check_password();
+		$this->footer();
 
 		$options = get_option('password_vault');
 
@@ -40,6 +41,7 @@ class password_vault_settings {
 			$this->finish_key_change();
 		} else {
 			
+			$this->validate_on_load();
 			echo '<form action="options.php" method="post">';
 			settings_fields('password_vault');
 			do_settings_sections('password_vault');
@@ -63,14 +65,35 @@ class password_vault_settings {
 		add_settings_field('label4', __('Custom Field 4:', ''), array(&$this, 'label4'), 'password_vault', 'password_vault_labels');
 		add_settings_field('label5', __('Custom Field 5:', ''), array(&$this, 'label5'), 'password_vault', 'password_vault_labels');
 		add_settings_field('seperate_icon', __('Dedicated Menu:', ''), array(&$this, 'seperate_icon'), 'password_vault', 'password_vault_labels');
+		add_settings_field('allow_delete', __('Allow Account Deletion:', ''), array(&$this, 'allow_delete'), 'password_vault', 'password_vault_labels');
+		add_settings_field('hide_dcac_ad', __('Hide Ad In Application:', ''), array(&$this, 'hide_dcac_ad'),
+'password_vault', 'password_vault_labels');
 		#add_settings_field('min_permissions', __('Minimum Permissions To Use: ', ''), array(&$this, 'min_permissions'), 'password_vault', 'password_vault_labels');
 
 		add_settings_section('password_vault_security', __('Security Settings', ''), array(&$this, 'security_settings'), 'password_vault');
 		add_settings_field('ssl_only', __('Requires SSL:', ''), array(&$this, 'ssl_only'), 'password_vault', 'password_vault_security');
 		add_settings_field('auditing', __('Enable Auditing:', ''), array(&$this, 'auditing'), 'password_vault', 'password_vault_security');
+		add_settings_field('hide_without_rights', __('Hide Accounts User Does Not Have Access To:', ''), array(&$this, 'hide_without_rights'), 'password_vault', 'password_vault_security');
+		add_settings_field('hide_page', __('Hide Page After X Seconds:', ''), array(&$this, 'hide_page'), 'password_vault', 'password_vault_security');
 		
 		add_settings_section('password_vault_keymanagement', __('Key Management', ''), array(&$this, 'keymanagement_section'), 'password_vault');
 		add_settings_field('oldkey', __('Old Key: ', ''), array(&$this, 'oldkey'), 'password_vault', 'password_vault_keymanagement');
+	}
+
+	function hide_dcac_ad() {
+		$options=get_option('password_vault');
+		echo "<input type='checkbox' name='password_vault[hide_dcac_ad]' value='checked' {$options['hide_dcac_ad']}>";
+	}
+
+	function allow_delete() {
+		$options=get_option('password_vault');
+		echo "<input type='checkbox' name='password_vault[allow_delete]' value='checked' {$options['allow_delete']}>";
+	}
+
+	function hide_page() {
+		$options=get_option('password_vault');
+		echo "<input type='checkbox' name='password_vault[hide_page]' value='checked' {$options['hide_page']}>";
+		echo "After <input type='text' name='password_vault[hide_page_after]' value='{$options['hide_page_after']}' size='5'> Seconds";
 	}
 
 	function seperate_icon() {
@@ -95,6 +118,11 @@ class password_vault_settings {
 		echo 'The "Require SSL" setting only applies to the usage of this plugin, not to the entire website.';
 	}
 
+	function hide_without_rights() {
+		$options = get_option('password_vault');
+		echo "<input type='checkbox' name='password_vault[hide_without_rights]' value='checked' {$options['hide_without_rights']}>";
+	}
+
 	function auditing() {
 		$options = get_option('password_vault');
 		echo "<input type='checkbox' name='password_vault[auditing]' value='checked' {$options['auditing']}>";
@@ -108,6 +136,7 @@ class password_vault_settings {
 	function min_permissions() {
 		$options = get_option('password_vault');
 		echo "<select name='password_vault[min_permissions]'>";
+
 		echo "<option";
 		if ($options['min_permissions']=="Admin") {
 			echo " selected";
@@ -174,19 +203,19 @@ class password_vault_settings {
 	function settings_validate($input) {
 		if (!$input['label1']) {
 			$input['label1_req']='';
-		}
+		} 
 		if (!$input['label2']) {
 			$input['label2_req']='';
-		}
+		} 
 		if (!$input['label3']) {
 			$input['label3_req']='';
-		}
+		} 
 		if (!$input['label4']) {
 			$input['label4_req']='';
 		}
 		if (!$input['label5']) {
 			$input['label5_req']='';
-		}
+		} 
 
 		$options = get_option('password_vault');
 		if ($options['auditing'] && !$input['auditing']) {
@@ -199,8 +228,30 @@ class password_vault_settings {
 			$password_vault_tools->insert_audit(0, 'audit_enabled', NULL, NULL, 'true');
 		}
 
+		if ($input['hide_page']) { 
+			
+			if ($input['hide_page_after']=='') {
+				add_settings_error('hide_page_after', 'error_hide_page_after', 'The number of seconds is required when the "hide page after" option is enabled.', 'error');
+			}
+		}
+
 		return $input;
 	}
+
+	function validate_on_load() {
+		$options=get_option('password_vault');
+		if ($options['seperate_icon']) {
+			if ($options['hide_page']) {
+				if ($options['hide_page_after']=='') {
+					echo '<div if="message" class="error"><p>The number of seconds is required when the "hide page after" option is enabled.</p></div>';
+
+					$options['hide_page'] = nothing;
+					update_option('password_vault', $options);
+				}
+			}
+		}
+	}
+
 
 	function finish_key_change() {
 		echo "By clicking the button below you understand that if the key which has been entered on the main settings page is incorrect all passwords within the system will be lost with no way to recover them.  It if HIGHLY recommended that before completing this operation that the WordPress database be backed up so that it can be restored in the event of a problem.  If you choose to proceed without a good, validated backup there is no support option which will get your data back.<p>This process may run for a while depending on how many records you have.  Do NOT stop the process.  If you have stopped the process, restore from a backup and start the process over again.";
@@ -214,12 +265,14 @@ class password_vault_settings {
 		if ($_POST['agreement']) {
 			$this->key_change_vault();
 			$this->key_change_audit();
+			$this->key_change_deleted();
 
 			echo '<div if="message" class="updated"><p>Process complete.  Please review the output below (if any).  Remove the old key from the settings page once any output has been reviewed and any problems have been addressed.</p></div>';
 		} else {
 			echo '<div if="message" class="error"><p>You must have a good and valid backup before taking this action!</p></div>';
 		}
 	}
+
 
 	function key_change_vault() {
 		global $wpdb;
@@ -237,6 +290,35 @@ class password_vault_settings {
 				$text = $this->decrypt_value_specific_key($account->password, $options['oldkey']);
 				if ($text) {
 					$sql = "update {$wpdb->prefix}password_vault_vault set password = %s where vault_id = %d";
+					$wpdb->query(
+						$wpdb->prepare($sql,
+						$password_vault_tools->encrypt_value($text), $account->vault_id)
+					);
+				} else {
+					echo "Error decrypting {$account->username} with ID number {$account->vault_id}.<br>";
+				}
+			}
+		}
+	}
+
+
+
+	function key_change_deleted() {
+		global $wpdb;
+		$options = get_option('password_vault');
+
+		$sql = "select vault_id, username, password
+			from {$wpdb->prefix}password_vault_deleted
+			order by vault_id";
+	
+		$accounts = $wpdb->get_results($sql);
+		$password_vault_tools = new password_vault_tools();
+
+		if ($accounts) {
+			foreach ($accounts as $account) {
+				$text = $this->decrypt_value_specific_key($account->password, $options['oldkey']);
+				if ($text) {
+					$sql = "update {$wpdb->prefix}password_vault_deleted set password = %s where vault_id = %d";
 					$wpdb->query(
 						$wpdb->prepare($sql,
 						$password_vault_tools->encrypt_value($text), $account->vault_id)

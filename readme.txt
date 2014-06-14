@@ -111,6 +111,16 @@ This is done as a security precaution.  Every time the plugin is activated it tu
 
 == Changelog ==
 
+= 1.5 =
+* Allows for users to see or not see accounts they have access to depending on setting.
+* Added validation to ensure that values are the correct length when being stored.
+* Added button to go from adding a new record to using that record quicker.
+* Added option to redirect away from page with password showing after <i>n</i> seconds.
+* Added a link to the "requires SSL" error to make it easier to get to the app via SSL.
+* Enabled account deletion, when deletion is enabled in the settings.
+* Made all custom fields wildcard searches by default.
+* Cleaned up buttons on the view account screen.
+
 = 1.3.2 =
 * Fixing icon in custom menu, because I'm an idiot.
 

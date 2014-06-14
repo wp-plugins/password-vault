@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: Password Vault
-Version: 1.3.2
+Version: 1.5
 Plugin URI: http://dcac.co/go/password-vault
 Description: Allows for the secure saving of passwords.  Access to a specific account can be given based on users and/or groups.  Groups are defined within WordPress or within the plugin directly.
 Author: Denny Cherry
@@ -36,7 +36,12 @@ class password_vault_main {
 			'label5_req' => 'checked',
 			'ssl_only' => '',
 			'auditing' => 'checked',
-			'seperate_icon' => 'checked'
+			'seperate_icon' => 'checked',
+			'hide_without_rights' => 'checked',
+			'hide_page' => 'checked',
+			'hide_page_after' => '10',
+			'allow_delete' => 'checked',
+			'hide_dcac_ad' => ''
 		);
 
 		// Add options
@@ -145,7 +150,17 @@ class password_vault_main {
 	}
 
 	function footer() {
-		#echo '<div id="wpfooter"><span id="footer-thankyou">Provided by <a href="http://www.dcac.co">Denny Cherry & Associates Consulting</a><p></span></div>';
+		$options=get_option('password_vault');
+		if (!$options['hide_dcac_ad']) {
+			$password_vault_main = new password_vault_main();
+			add_filter('admin_footer_text', array($password_vault_main, 'show_footer'));
+		} else {
+			remove_filter('admin_footer_text', array($password_vault_main, 'show_footer'));
+		}
+	}
+
+	function show_footer() {
+		echo '<span id="footer-thankyou"><a href="http://dcac.co/applications/password-vault">Password Vault</a> provided by <a href="http://www.dcac.co">Denny Cherry & Associates Consulting</a><p></span>';
 	}
 } //End Class
 
@@ -157,4 +172,4 @@ add_action('admin_menu', array($password_vault, 'settings_menu'));
 add_action('admin_init', array($password_vault, 'init_settings'), 1);
 add_filter('plugin_action_links', array($password_vault, 'settings_menu_add_settings_link'),10,2);
 register_deactivation_hook( __FILE__, array($password_vault, 'deactivation' ));
-add_filter('upgrader_post_install', array($password_vault, 'upgrade'), 10, 2); //Deploy database proc on upgrade as needed.
+add_filter('upgrader_post_install', array($password_vault, 'upgrade'), 10, 2);

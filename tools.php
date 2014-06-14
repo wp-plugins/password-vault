@@ -4,8 +4,10 @@ class password_vault_tools {
 
 	function show_tools_page() {
 		$options = get_option('password_vault');
+
 		if ($options['ssl_only'] && !is_ssl()) {
-			echo '<div if="message" class="error"><p>This application is configured to require SSL.  You have connected to this website without using SSL. Please connect using HTTPS:// instead of HTTP:// in order to use this application or contact your administrator to disable this requirement.</p></div>';
+			$ssl_url = "https://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
+			echo "<div if='message' class='error'><p>This application is configured to require SSL.  You have connected to this website without using SSL. Please connect using <a href='{$ssl_url}'>HTTPS://</a> instead of HTTP:// in order to use this application or contact your administrator to disable this requirement.</p></div>";
 			return;
 		}
 
@@ -83,13 +85,15 @@ where vault_id = %d",
 				$this->save_account('update', $status);
 			}
 			$this->show_account();
-		}elseif ($action=='edit_permissions') {
-			if ($_POST['sub_action']=='update') {
+		}elseif ($action=='Edit Permissions' || $action=='edit_permissions') {
+			if ($_POST['sub_action2']=='update') {
 				$this->update_permissions();
 			}
 			$this->show_permissions();
 		}elseif ($action=='view_archive') {
 			$this->view_archive();
+		}elseif ($action=='Delete Account' || $action=='delete_account') {
+			$this->delete_account();
 		}
 		else {
 			$this->base_display();
@@ -202,6 +206,13 @@ ORDER BY v.create_date desc, audit_id desc";
 		echo ' /></form>';
 		echo "<BR> Fields with an * are required.";
 
+		if ($status=='success') {
+			echo "<form method='post' >";
+			echo "<input type='hidden' name='action' value='Find Account'>";
+			echo "<input type='hidden' name='sub_action' value='search'>";
+			echo "<input type='hidden' name='username' value='{$_POST['username']}'>";
+			echo '<p class="submit"><input name="submit" type="submit" class="button-primary" value="Edit Account"></p>';
+		}
 	}
 
 	function save_account($command, &$status) {
@@ -253,6 +264,52 @@ ORDER BY v.create_date desc, audit_id desc";
 			}
 		}
 		
+		if (!empty($options['label1'])) {
+			if (strlen($_POST['label1']) > 50) {
+				$error=true;
+				echo "<div if='message' class='error'><p>{$options['label1']} value must less then 50 characters.</p></div>";
+			}
+		}
+
+		if (!empty($options['label2'])) {
+			if (strlen($_POST['label2']) > 50) {
+				$error=true;
+				echo "<div if='message' class='error'><p>{$options['label2']} value must less then 50 characters.</p></div>";
+			}
+		}
+
+		if (!empty($options['label3'])) {
+			if (strlen($_POST['label3']) > 50) {
+				$error=true;
+				echo "<div if='message' class='error'><p>{$options['label3']} value must less then 50 characters.</p></div>";
+			}
+		}
+
+		if (!empty($options['label4'])) {
+			if (strlen($_POST['label4']) > 50) {
+				$error=true;
+				echo "<div if='message' class='error'><p>{$options['label4']} value must less then 50 characters.</p></div>";
+			}
+		}
+
+		if (!empty($options['label5'])) {
+			if (strlen($_POST['label5']) > 50) {
+				$error=true;
+				echo "<div if='message' class='error'><p>{$options['label5']} value must less then 50 characters.</p></div>";
+			}
+		}
+
+		if (strlen($_POST['username']) > 255) {
+			$error=true;
+			echo "<div if='message' class='error'><p>Username value must less then 255 characters.</p></div>";
+		}
+
+		if (strlen($this->encrypt_value($_POST['password'])) > 255) {
+			$error=true;
+			$len = strlen($this->encrypt_value($_POST['password'])) ;
+			echo "<div if='message' class='error'><p>The encrypted value of this password is to long to store in this system.  Please report this error to your systems admin, or report it to the support team for this plugin.  Advise them that the password length was {$len}.  This account was not saved.</p></div>";
+		}
+
 		if ($error) {
 			$status='failed';
 			return;
@@ -343,14 +400,20 @@ ORDER BY v.create_date desc, audit_id desc";
 		$user_id = get_current_user_id();
 		$username = "{$_POST['username']}%";
 
+		if ($options['hide_without_rights']) {
+			$extra_where = 'and (up.vault_id is not null or gp.vault_id is not null)';
+		} else {
+			$extra_where = '';
+		}
+
 		$sql = "select v.*, up.read_per user_read_per, up.write_per user_write_per, up.owner_per user_owner_per, gp.read_per group_read_per, gp.write_per group_write_per, gp.owner_per group_owner_per
 			from {$wpdb->prefix}password_vault_vault v
 			left outer join {$wpdb->prefix}password_vault_user_permissions up on v.vault_id = up.vault_id
 				and up.user_id = {$user_id}
 			left outer join {$wpdb->prefix}password_vault_group_permissions gp on v.vault_id = gp.vault_id
-			left outer join {$wpdb->prefix}password_vault_group_users gu on gp.group_id = gu.group_id
+			left outer  join {$wpdb->prefix}password_vault_group_users gu on gp.group_id = gu.group_id
 				and gu.user_id = {$user_id}
-			where username LIKE %s";
+			where username LIKE %s {$extra_where}";
 
 		if ($_POST['label1']) {
 			$sql="{$sql} and label1 LIKE %s";
@@ -370,24 +433,24 @@ ORDER BY v.create_date desc, audit_id desc";
 
 		$values = array($username);
 
-		if ($_POST['label1']) {
-			array_push($values, $_POST['label1']);
+		if ($_POST['label1']) {						
+			array_push($values, "{$_POST['label1']}%");
 		}
 
 		if ($_POST['label2']) {
-			array_push($values, $_POST['label2']);
+			array_push($values, "{$_POST['label2']}%"); 
 		}
 
 		if ($_POST['label3']) {
-			array_push($values, $_POST['label3']);
+			array_push($values, "{$_POST['label3']}%" );
 		}
 
 		if ($_POST['label4']) {
-			array_push($values, $_POST['label4']);
+			array_push($values, "{$_POST['label4']}%" );
 		}
 
 		if ($_POST['label5']) {
-			array_push($values, $_POST['label5']);
+			array_push($values, "{$_POST['label5']}%" );
 		}
 
 		$accounts = $wpdb->get_results(
@@ -495,6 +558,12 @@ ORDER BY v.create_date desc, audit_id desc";
 		global $wpdb;
 		$options = get_option('password_vault');
 
+		$page = $this->get_source_page();
+
+		if ($options['hide_page']) {
+			echo "<meta http-equiv='refresh' content='{$options['hide_page_after']}; url={$page}?page=password_vault'/>";
+		}
+
 		$user_id = get_current_user_id();
 		if ($_POST['vault_id']) {
 			$vault_id = $_POST['vault_id'];
@@ -580,15 +649,24 @@ ORDER BY v.create_date desc, audit_id desc";
 			echo "</table>";
 			if ($this->effective_permission($account, 'write')==1) {
 				echo "<input type='hidden' name='vault_id' value='{$account->vault_id}'>";
-				echo '<div class="submit"><input name="submit" type="submit" class="button-primary" value="Save Changes"></div></form>';
-				echo "Fields with an * are required.";
-			}
-			if ($this->effective_permission($account, 'owner')==1) {
-				echo "<form name='edit_permissions' method='post'>";
-				echo '<div class="submit"><input name="submit" type="submit" class="button-primary" value="Edit Permissions"></div>';
-				echo "<input type='hidden' name='action' value='edit_permissions'>";
-				echo "<input type='hidden' name='vault_id' value='{$account->vault_id}'></form>";
+				echo '<div class="submit"><input name="submit" type="submit" class="button-primary" value="Save Changes">';
+if ($this->effective_permission($account, 'owner')==1) {
+				#echo "<form name='edit_permissions' method='post'>";
+				echo '&nbsp;&nbsp;&nbsp;&nbsp;<input name="action" type="submit" class="button-primary" value="Edit Permissions">';
+				#echo "<input type='hidden' name='action' value='edit_permissions'>";
+				#echo "<input type='hidden' name='vault_id' value='{$account->vault_id}'></form>";
 
+				if ($options['allow_delete']) {
+					#echo "<form name='delete_account' method='post'>";
+					echo '&nbsp;&nbsp;&nbsp;&nbsp;<input name="action" type="submit" class="button-primary" value="Delete Account">';
+					#echo "<input type='hidden' name='action' value='delete_account'>";
+					#echo "<input type='hidden' name='vault_id' value='{$account->vault_id}'></form>";
+				}
+
+			}
+
+				echo '</div></form>';
+				echo "Fields with an * are required.";
 			}
 		} else {
 			echo '<div if="message" class="error"><p>Invalid Account Identified!</p></div>';
@@ -635,7 +713,7 @@ ORDER BY v.create_date desc, audit_id desc";
 					echo "<form name='edit_permissions' method='post'>";
 					
 					echo "<input type='hidden' name='action' value='edit_permissions'>";
-					echo "<input type='hidden' name='sub_action' value='update'>";
+					echo "<input type='hidden' name='sub_action2' value='update'>";
 					echo "<input type='hidden' name='vault_id' value='{$account->vault_id}'>";
 					echo "<tr><td align='center'><b>User Name</b></td><td align='center'><b>Read</b></td><td align='center'><b>Write</b></td><td align='center'><b>Owner</b></td></tr>";
 					foreach ($permissions as $permission) {
@@ -857,6 +935,36 @@ ORDER BY v.create_date desc, audit_id desc";
 		$password_vault_main = new password_vault_main();
 		$page = $password_vault_main->get_source_page('tools');
 		return $page;
+	}
+
+	function delete_account() {
+
+		$options = get_option('password_vault');
+
+		if (!$options['allow_delete']) {
+			echo "<div if='message' class='error'><p>Account deletion is not enabled.  Account can not be deleted.</p></div>";
+			return;
+		}
+		global $wpdb;
+
+		$sql = "insert into {$wpdb->prefix}password_vault_deleted
+			(vault_id, username, password, label1, label2, label3, label4, label5, create_date, modify_date, create_by, modify_by)
+			select vault_id, username, password, label1, label2, label3, label4, label5, create_date, modify_date, create_by, modify_by
+			from {$wpdb->prefix}password_vault_vault
+			where vault_id = %d";
+
+		$wpdb->query(
+			$wpdb->prepare($sql, $_POST['vault_id'])
+		);
+
+		$sql = "delete from {$wpdb->prefix}password_vault_vault
+			where vault_id = %d";
+
+		$wpdb->query(
+			$wpdb->prepare($sql, $_POST['vault_id'])
+		);
+
+		echo "<div if='message' class='updated'><p>Account has been deleted.</p></div>";
 	}
 
 }

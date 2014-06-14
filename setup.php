@@ -37,7 +37,31 @@ class password_vault_setup {
 			`create_date` datetime NOT NULL,
 			`modify_date` datetime NULL,
 			`create_by` bigint(20) NOT NULL,
-			`modify_by` bigint(20) NULL,
+			`modify_by` bigint(20) NULL,			
+			PRIMARY KEY (`vault_id`),
+			INDEX `ix_username` (`username`),
+			INDEX `ix_username_label1` (`username`, `label1`),
+			INDEX `ix_username_label2` (`username`, `label2`),
+			INDEX `ix_username_label3` (`username`, `label3`),
+			INDEX `ix_username_label4` (`username`, `label4`),
+			INDEX `ix_username_label5` (`username`, `label5`)
+			) $charset_collate";
+		$wpdb->query($sql);
+
+
+		$sql = 	"CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}password_vault_deleted`(
+			`vault_id` int(11) unsigned  NOT NULL,
+			`username` varchar(255) NOT NULL,
+			`password` varchar(255) NOT NULL,
+			`label1` varchar(50) NOT NULL,
+			`label2` varchar(50) NOT NULL,
+			`label3` varchar(50) NOT NULL,
+			`label4` varchar(50) NOT NULL,
+			`label5` varchar(50) NOT NULL,
+			`create_date` datetime NOT NULL,
+			`modify_date` datetime NULL,
+			`create_by` bigint(20) NOT NULL,
+			`modify_by` bigint(20) NULL,			
 			PRIMARY KEY (`vault_id`),
 			INDEX `ix_username` (`username`),
 			INDEX `ix_username_label1` (`username`, `label1`),
