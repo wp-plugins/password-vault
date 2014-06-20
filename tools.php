@@ -697,10 +697,18 @@ if ($this->effective_permission($account, 'owner')==1) {
 
 		if ($account) {
 			if ($this->effective_permission($account, 'owner')==1) {
-				$sql = "select u.ID, u.user_login, case when up.read_per = 1 then 'checked' else '' end user_read_per, case when up.write_per = 1 then 'checked' else '' end user_write_per, case when up.owner_per = 1 then 'checked' else '' end user_owner_per
+				$sql = "select distinct u.ID, u.user_login, case when up.read_per = 1 then 'checked' else '' end user_read_per, case when up.write_per = 1 then 'checked' else '' end user_write_per, case when up.owner_per = 1 then 'checked' else '' end user_owner_per
 				from {$wpdb->users} u
 				left outer join {$wpdb->prefix}password_vault_user_permissions up ON up.user_id = u.ID
 				and up.vault_id = %d";
+
+				if ($options['limit_security_view']) {
+					$sql = "{$sql}
+					join {$wpdb->prefix}password_vault_group_users vgu on u.ID = vgu.user_id
+					where vgu.group_id in (select group_id from {$wpdb->prefix}password_vault_group_users where user_id = {$user_id})";
+				}
+
+				$sql = "{$sql} order by u.user_login";
 
 				$values = array($_GET['vault_id']);
 
@@ -740,10 +748,18 @@ if ($this->effective_permission($account, 'owner')==1) {
 					}
 					//echo "</table>";
 
-				$sql = "select g.group_name, g.group_id, case when up.read_per = 1 then 'checked' else '' end group_read_per, case when up.write_per = 1 then 'checked' else '' end group_write_per, case when up.owner_per = 1 then 'checked' else '' end group_owner_per
+				$sql = "select distinct g.group_name, g.group_id, case when up.read_per = 1 then 'checked' else '' end group_read_per, case when up.write_per = 1 then 'checked' else '' end group_write_per, case when up.owner_per = 1 then 'checked' else '' end group_owner_per
 				from {$wpdb->prefix}password_vault_groups g
 				left outer join {$wpdb->prefix}password_vault_group_permissions up ON up.group_id = g.group_id
 				and up.vault_id = %d";
+
+				if ($options['limit_security_view']) {
+					$sql = "{$sql}
+					join {$wpdb->prefix}password_vault_group_users vgu on g.group_id = vgu.group_id
+					where vgu.group_id in (select group_id from {$wpdb->prefix}password_vault_group_users where user_id = {$user_id})";
+				}
+
+				$sql = "{$sql} order by group_name";
 
 				$values = array($_GET['vault_id']);
 

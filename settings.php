@@ -75,14 +75,28 @@ class password_vault_settings {
 		add_settings_field('auditing', __('Enable Auditing:', ''), array(&$this, 'auditing'), 'password_vault', 'password_vault_security');
 		add_settings_field('hide_without_rights', __('Hide Accounts User Does Not Have Access To:', ''), array(&$this, 'hide_without_rights'), 'password_vault', 'password_vault_security');
 		add_settings_field('hide_page', __('Hide Page After X Seconds:', ''), array(&$this, 'hide_page'), 'password_vault', 'password_vault_security');
+		add_settings_field('limit_security_view', __('Limit User and Group View:', ''), array(&$this, 'limit_security_view'), 'password_vault', 'password_vault_security');
+		add_settings_field('group_membership_to_use', __('Group Membership Required to See Password Vault:', ''), array(&$this, 'group_membership_to_use'), 'password_vault', 'password_vault_security');
 		
 		add_settings_section('password_vault_keymanagement', __('Key Management', ''), array(&$this, 'keymanagement_section'), 'password_vault');
 		add_settings_field('oldkey', __('Old Key: ', ''), array(&$this, 'oldkey'), 'password_vault', 'password_vault_keymanagement');
 	}
 
+	function group_membership_to_use() {
+		$options=get_option('password_vault');
+		echo "<input type='checkbox' name='password_vault[group_membership_to_use]' value='checked' {$options['group_membership_to_use']}>";
+		echo "Settings page is always available to administrators.";
+	}
+
 	function hide_dcac_ad() {
 		$options=get_option('password_vault');
 		echo "<input type='checkbox' name='password_vault[hide_dcac_ad]' value='checked' {$options['hide_dcac_ad']}>";
+	}
+
+	function limit_security_view() {
+		$options=get_option('password_vault');
+		echo "<input type='checkbox' name='password_vault[limit_security_view]' value='checked' {$options['limit_security_view']}>";
+		echo "Limits a user to only being able to see groups they are a member of, and users that are in groups with them.";
 	}
 
 	function allow_delete() {

@@ -111,6 +111,11 @@ This is done as a security precaution.  Every time the plugin is activated it tu
 
 == Changelog ==
 
+= 1.6 =
+* Added a setting to hide the application unless the user is a member of a group within the application.
+* Added a setting to hide users and groups which the user doesn't have a group relationship with.
+* Changed the builtin ad from showing the Wordpress version number to the plugin version number.
+
 = 1.5 =
 * Allows for users to see or not see accounts they have access to depending on setting.
 * Added validation to ensure that values are the correct length when being stored.

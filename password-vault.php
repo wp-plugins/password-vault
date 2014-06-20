@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: Password Vault
-Version: 1.5
+Version: 1.6
 Plugin URI: http://dcac.co/go/password-vault
 Description: Allows for the secure saving of passwords.  Access to a specific account can be given based on users and/or groups.  Groups are defined within WordPress or within the plugin directly.
 Author: Denny Cherry
@@ -41,7 +41,9 @@ class password_vault_main {
 			'hide_page' => 'checked',
 			'hide_page_after' => '10',
 			'allow_delete' => 'checked',
-			'hide_dcac_ad' => ''
+			'hide_dcac_ad' => '',
+			'limit_security_view' => '',
+			'group_membership_to_use' => ''
 		);
 
 		// Add options
@@ -86,13 +88,23 @@ class password_vault_main {
 		$options = get_option('password_vault');
 
 		if ($options['seperate_icon'] != 'checked') {
-			$forms = new password_vault_tools();
-
-			add_submenu_page('tools.php', __('Password Vault', 'password_vault'), __('Password Vault', 'password_vault'), 'read', 'password_vault', array($forms, 'show_tools_page'));
-
+			if (($options['group_membership_to_use'] && $this->is_in_group() != 0) || !$options['group_membership_to_use']) {
+				$forms = new password_vault_tools();
+	
+				add_submenu_page('tools.php', __('Password Vault', 'password_vault'), __('Password Vault', 'password_vault'), 'read', 'password_vault', array($forms, 'show_tools_page'));
+			}
 		} else {
 			$this->custom_menu();
 		}
+	}
+
+	function is_in_group() {
+		global $wpdb;
+		$user_id = get_current_user_id();
+		
+		$count = $wpdb->get_var("select count(*) from {$wpdb->prefix}password_vault_group_users where user_id = $user_id");
+
+		return $count;
 	}
 
 	function settings_menu() {
@@ -107,12 +119,15 @@ class password_vault_main {
 	}
 
 	function custom_menu() {
+		$options = get_option('password_vault');
 		$password_vault_tools = new password_vault_tools();
 		$password_vault_settings = new password_vault_settings();
 
 		add_menu_page('Password Vault', 'Password Vault', '', 'password_vault_top', array($password_vault_tools, 'show_tools_page'), plugins_url( 'password-vault/icon.png' ));
 
-		add_submenu_page('password_vault_top', 'Password Vault', 'Password Vault', 'read', 'password_vault', array($password_vault_tools, 'show_tools_page'));
+		if (($options['group_membership_to_use'] && $this->is_in_group() != 0) || !$options['group_membership_to_use']) {
+			add_submenu_page('password_vault_top', 'Password Vault', 'Password Vault', 'read', 'password_vault', array($password_vault_tools, 'show_tools_page'));
+		}
 
 		add_submenu_page('password_vault_top', 'Password Vault Settings', 'Password Vault Settings', 'manage_options', 'password_vault_settings', array($password_vault_settings, 'show_settings_page'));
 	}
@@ -154,13 +169,22 @@ class password_vault_main {
 		if (!$options['hide_dcac_ad']) {
 			$password_vault_main = new password_vault_main();
 			add_filter('admin_footer_text', array($password_vault_main, 'show_footer'));
+			add_filter( 'update_footer', array($password_vault_main, 'show_footer_version'));
 		} else {
 			remove_filter('admin_footer_text', array($password_vault_main, 'show_footer'));
+			remove_filter( 'update_footer', array($password_vault_main, 'show_footer_version'));
 		}
 	}
 
 	function show_footer() {
 		echo '<span id="footer-thankyou"><a href="http://dcac.co/applications/password-vault">Password Vault</a> provided by <a href="http://www.dcac.co">Denny Cherry & Associates Consulting</a><p></span>';
+		
+	}
+
+	function show_footer_version() {
+		$folder = plugins_url();
+		$info = get_plugin_data( __FILE__ );
+		echo "Version {$info['Version']}";
 	}
 } //End Class
 
