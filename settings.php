@@ -80,6 +80,14 @@ class password_vault_settings {
 		
 		add_settings_section('password_vault_keymanagement', __('Key Management', ''), array(&$this, 'keymanagement_section'), 'password_vault');
 		add_settings_field('oldkey', __('Old Key: ', ''), array(&$this, 'oldkey'), 'password_vault', 'password_vault_keymanagement');
+
+	 	$folder = plugin_dir_path( __DIR__);
+	 	if (is_file("{$folder}/password-vault-hosting/hosting.php")) {
+			require_once "{$folder}/password-vault-hosting/hosting.php";
+			$hosting = new password_vault_hosting();
+			$hosting->hosting_settings();
+		}
+
 	}
 
 	function group_membership_to_use() {

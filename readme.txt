@@ -111,7 +111,7 @@ This is done as a security precaution.  Every time the plugin is activated it tu
 
 == Changelog ==
 
-= 1.7 =
+= 1.7.1 =
 * Changed graphics to use absolute paths based on plugin folder location, so they aren't incorrect if using non-default location.
 * Cleaned up some class calls.
 * Uploaded this update from 30k feet at 400mph, because that's just how I roll.
