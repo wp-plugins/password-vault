@@ -111,6 +111,12 @@ This is done as a security precaution.  Every time the plugin is activated it tu
 
 == Changelog ==
 
+= 1.7 =
+* Changed graphics to use absolute paths based on plugin folder location, so they aren't incorrect if using non-default location.
+* Cleaned up some class calls.
+* Uploaded this update from 30k feet at 400mph, because that's just how I roll.
+
+
 = 1.6 =
 * Added a setting to hide the application unless the user is a member of a group within the application.
 * Added a setting to hide users and groups which the user doesn't have a group relationship with.
