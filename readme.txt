@@ -3,7 +3,7 @@ Contributors: mrdenny
 Donate Link: http://dcac.co/go/password-vault
 Tags: passwords, password vault, password repository, password locker, password, keypass, 7pass, lastpass, 1password, keeper, security, password keeper, consultant
 Requires at least: 3.0.1
-Tested up to: 4.0
+Tested up to: 4.1
 Stable tag: trunk
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -111,8 +111,13 @@ This is done as a security precaution.  Every time the plugin is activated it tu
 
 == Changelog ==
 
-= 1.7.2 =
-* Tested for version 4.0
+= 1.8 =
+* Tested for version 4.1
+* Verified that all database calls with parameters which have user specified data are paramaterized
+* Sanatizing user inputs to prevent javascript attacks
+
+
+
 
 = 1.7.1 =
 * Changed graphics to use absolute paths based on plugin folder location, so they aren't incorrect if using non-default location.

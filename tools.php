@@ -320,13 +320,17 @@ ORDER BY v.create_date desc, audit_id desc";
 
 			$wpdb->query(
 				$wpdb->prepare("insert into {$wpdb->prefix}password_vault_vault (username, password, label1, label2, label3, label4, label5, create_date, create_by, modify_date, modify_by) values (%s, %s, %s, %s, %s, %s, %s, now(), %d, null, null)",
-				$_POST['username'], $this->encrypt_value($_POST['password']), $_POST['label1'], $_POST['label2'], $_POST['label3'], $_POST['label4'], $_POST['label5'], $user_id)
+				stripslashes($_POST['username']), $this->encrypt_value(stripslashes($_POST['password'])), $_POST['label1'], $_POST['label2'], $_POST['label3'], $_POST['label4'], $_POST['label5'], $user_id)
 			);
 
 				$vault_id = $wpdb->get_var("SELECT MAX(vault_id) FROM {$wpdb->prefix}password_vault_vault");
 
-			$sql = "insert into {$wpdb->prefix}password_vault_user_permissions (user_id, vault_id, read_per, write_per, owner_per) values ({$user_id}, {$vault_id}, 1,1,1)";
-			$wpdb->query($sql);
+			$sql = "insert into {$wpdb->prefix}password_vault_user_permissions (user_id, vault_id, read_per, write_per, owner_per) values (%d, %d, 1,1,1)";
+			$wpdb->query(
+				$wpdb->prepare(
+					$sql
+				), array($user_id, $vault_id)
+			);
 
 			echo "<div if='message' class='updated'><p>{$this->clean_text($_POST['username'])} has been added with an ID of {$vault_id}.</p></div>";
 
@@ -339,7 +343,7 @@ ORDER BY v.create_date desc, audit_id desc";
 
 			$wpdb->query(
 				$wpdb->prepare("update {$wpdb->prefix}password_vault_vault set username = %s, password = %s, label1 = %s, label2 = %s, label3 = %s, label4 = %s, label5 = %s, modify_date=now(), modify_by=%d WHERE vault_id = %d",
-				$_POST['username'], $this->encrypt_value($_POST['password']), $_POST['label1'], $_POST['label2'], $_POST['label3'], $_POST['label4'], $_POST['label5'], get_current_user_id(), $_POST['vault_id'])
+				stripslashes($_POST['username']), $this->encrypt_value(stripslashes($_POST['password'])), $_POST['label1'], $_POST['label2'], $_POST['label3'], $_POST['label4'], $_POST['label5'], get_current_user_id(), $_POST['vault_id'])
 			);
 			echo "<div if='message' class='updated'><p>{$this->clean_text($_POST['username'])} has been updated.</p></div>";
 
@@ -599,48 +603,100 @@ ORDER BY v.create_date desc, audit_id desc";
 			$this->insert_audit($vault_id, 'select');
 
 			echo "<table>";
-			echo "<tr><td>User Name:</td><td><input type='text' name='username' value='{$this->clean_text($account->username)}'";
+
+			$usr = $account->username;
+			$usr = str_replace("&", "&amp;", $usr );
+			$usr = str_replace("<", "&lt;", $usr );
+			$usr = str_replace(">", "&gt;", $usr );
+			$usr = str_replace('"', '&#34;', $usr );
+			$usr = str_replace("'", "&#39;", $usr );
+
+
+			echo "<tr><td>User Name:</td><td><input type='text' name='username' value='{$usr}'";
 			if ($status=='success') {
 				echo ' disabled';
 			}
 			echo ">*</td></tr>";
 			echo "<tr><td>Password:</td><td>";
 			if ($this->effective_permission($account, 'read')==1) {
-				echo "<input type='text' name='password' value='{$this->decrypt_value($account->password)}'>*";
+
+				$pwd = $this->decrypt_value($account->password);
+				$pwd = str_replace("&", "&amp;", $pwd);
+				$pwd = str_replace("<", "&lt;", $pwd);
+				$pwd = str_replace(">", "&gt;", $pwd);
+				$pwd = str_replace('"', '&#34;', $pwd);
+				$pwd = str_replace("'", "&#39;", $pwd);
+
+				echo "<input type='text' name='password' value='{$pwd}'>*";
 			} else {
 				echo "Password not available to this user.";
 			}
 			echo "</td><tr>";
 			if (!empty($options['label1'])) {
-				echo "<tr><td>{$options['label1']}:</td><td><input type='text' name='label1' value='{$this->clean_text($account->label1)}'>";
+				$str = $account->label1;
+				$str = str_replace("&", "&amp;", $str );
+				$str = str_replace("<", "&lt;", $str );
+				$str = str_replace(">", "&gt;", $str );
+				$str = str_replace('"', '&#34;', $str );
+				$str = str_replace("'", "&#39;", $str );
+
+				echo "<tr><td>{$options['label1']}:</td><td><input type='text' name='label1' value='{$str}'>";
 			if (!empty($options['label1_req'])) {
 				echo "*";
 			}
 			echo "</td></tr>";
 			}
 			if (!empty($options['label2'])) {
-				echo "<tr><td>{$options['label2']}:</td><td><input type='text' name='label2' value='{$this->clean_text($account->label2)}'>";
+				$str = $account->label2;
+				$str = str_replace("&", "&amp;", $str );
+				$str = str_replace("<", "&lt;", $str );
+				$str = str_replace(">", "&gt;", $str );
+				$str = str_replace('"', '&#34;', $str );
+				$str = str_replace("'", "&#39;", $str );
+
+				echo "<tr><td>{$options['label2']}:</td><td><input type='text' name='label2' value='{$str}'>";
 			if (!empty($options['label2_req'])) {
 				echo "*";
 			}
 			echo "</td></tr>";
 			}
 			if (!empty($options['label3'])) {
-				echo "<tr><td>{$options['label3']}:</td><td><input type='text' name='label3' value='{$this->clean_text($account->label3)}'>";
+				$str = $account->label3;
+				$str = str_replace("&", "&amp;", $str );
+				$str = str_replace("<", "&lt;", $str );
+				$str = str_replace(">", "&gt;", $str );
+				$str = str_replace('"', '&#34;', $str );
+				$str = str_replace("'", "&#39;", $str );
+
+				echo "<tr><td>{$options['label3']}:</td><td><input type='text' name='label3' value='{$str}'>";
 			if (!empty($options['label3_req'])) {
 				echo "*";
 			}
 			echo "</td></tr>";
 			}
 			if (!empty($options['label4'])) {
-				echo "<tr><td>{$options['label4']}:</td><td><input type='text' name='label4' value='{$this->clean_text($account->label4)}'>";
+				$str = $account->label4;
+				$str = str_replace("&", "&amp;", $str );
+				$str = str_replace("<", "&lt;", $str );
+				$str = str_replace(">", "&gt;", $str );
+				$str = str_replace('"', '&#34;', $str );
+				$str = str_replace("'", "&#39;", $str );
+
+				echo "<tr><td>{$options['label4']}:</td><td><input type='text' name='label4' value='{$str}'>";
 			if (!empty($options['label4_req'])) {
 				echo "*";
 			}
 			echo "</td></tr>";
 			}
 			if (!empty($options['label5'])) {
-				echo "<tr><td>{$options['label5']}:</td><td><input type='text' name='label5' value='{$this->clean_text($account->label5)}'>";
+				$str = $account->label5;
+				$str = str_replace("&", "&amp;", $str );
+				$str = str_replace("<", "&lt;", $str );
+				$str = str_replace(">", "&gt;", $str );
+				$str = str_replace('"', '&#34;', $str );
+				$str = str_replace("'", "&#39;", $str );
+
+				echo "<tr><td>{$options['label5']}:</td><td><input type='text' name='label5' value='{$str}'>";
 			if (!empty($options['label5_req'])) {
 				echo "*";
 			}
