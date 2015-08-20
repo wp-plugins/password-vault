@@ -111,6 +111,11 @@ This is done as a security precaution.  Every time the plugin is activated it tu
 
 == Changelog ==
 
+= 1.8.1 =
+* Tested for version 4.3
+* Fixed issue with users being able to see passwords from other groups
+* Fixed issue with permissions not being added to new records on insert correctly
+
 = 1.8 =
 * Tested for version 4.1
 * Verified that all database calls with parameters which have user specified data are paramaterized

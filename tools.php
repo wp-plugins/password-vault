@@ -328,8 +328,8 @@ ORDER BY v.create_date desc, audit_id desc";
 			$sql = "insert into {$wpdb->prefix}password_vault_user_permissions (user_id, vault_id, read_per, write_per, owner_per) values (%d, %d, 1,1,1)";
 			$wpdb->query(
 				$wpdb->prepare(
-					$sql
-				), array($user_id, $vault_id)
+					$sql, array($user_id, $vault_id)
+				)
 			);
 
 			echo "<div if='message' class='updated'><p>{$this->clean_text($_POST['username'])} has been added with an ID of {$vault_id}.</p></div>";
@@ -417,7 +417,7 @@ ORDER BY v.create_date desc, audit_id desc";
 			left outer join {$wpdb->prefix}password_vault_group_permissions gp on v.vault_id = gp.vault_id
 			left outer  join {$wpdb->prefix}password_vault_group_users gu on gp.group_id = gu.group_id
 				and gu.user_id = {$user_id}
-			where username LIKE %s {$extra_where}";
+			where username LIKE %s {$extra_where} and (gu.group_id is not null or up.read_per = 1)";
 
 		if ($_POST['label1']) {
 			$sql="{$sql} and label1 LIKE %s";
