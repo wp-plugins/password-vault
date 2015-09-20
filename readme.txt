@@ -3,7 +3,7 @@ Contributors: mrdenny
 Donate Link: http://dcac.co/go/password-vault
 Tags: passwords, password vault, password repository, password locker, password, keypass, 7pass, lastpass, 1password, keeper, security, password keeper, consultant
 Requires at least: 3.0.1
-Tested up to: 4.1
+Tested up to: 4.3.1
 Stable tag: trunk
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
